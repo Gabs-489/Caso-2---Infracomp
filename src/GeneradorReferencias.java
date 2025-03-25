@@ -3,6 +3,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.Map;
 
 public class GeneradorReferencias {
 
@@ -10,6 +12,7 @@ public class GeneradorReferencias {
     private String nomImagen;
     private Path pathImagenEntrada;
     private Path pathImagenSalida;
+    Map<String, String> pagImagenes = new HashMap<>();
 
     public GeneradorReferencias (int tamPaginat, String nomImagent){
         this.tamPagina = tamPaginat;
@@ -73,6 +76,8 @@ public class GeneradorReferencias {
                                     pag+=1;
                                     desplazamientoPag = 0;
                                 }
+
+                                //Encontrar Canal
                                 String canal = "r";
                                 if (g==1){
                                     canal = "g";
@@ -80,9 +85,18 @@ public class GeneradorReferencias {
                                 else if(g==2){
                                     canal = "b";
                                 }
-                                String mensaje = String.format("Imagen[%d][%d].%s, %d, %d, R", i+ki, j+kj,canal,pag,desplazamientoPag);
+
+                                //Ver si ya esta en una pagina
+                                
+                                String imagLlave = String.format("Imagen[%d][%d].%s", i+ki,j+kj,canal);
+                                String mensaje = pagImagenes.get(imagLlave);
+                                if (mensaje == null){
+                                    mensaje = String.format("Imagen[%d][%d].%s, %d, %d, R", i+ki, j+kj,canal,pag,desplazamientoPag);
+                                    desplazamientoPag+=1;
+                                    pagImagenes.put(imagLlave, mensaje);
+                                }
                                 writer.write(mensaje + "\n");
-                                desplazamientoPag+=1;
+                                
                             }
 
                             //Escribir Para filtros
