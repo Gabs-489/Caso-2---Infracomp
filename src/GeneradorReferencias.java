@@ -30,7 +30,7 @@ public class GeneradorReferencias {
         imagenOut.escribirImagen(pathImagenSalida.toString());
 
 
-        String pathSalida = "/src/referencias_" + nomImagen;
+        String pathSalida = System.getProperty("user.dir") + "/src/referencias_" + nomImagen;
         
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(pathSalida, true))) {
             writer.write("TP="+ Integer.toString(this.tamPagina) + "\n");
