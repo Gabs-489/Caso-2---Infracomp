@@ -13,6 +13,7 @@ public class GeneradorReferencias {
     private Path pathImagenEntrada;
     private Path pathImagenSalida;
     Map<String, String> pagImagenes = new HashMap<>();
+    Map<String, String> pagRta = new HashMap<>();
 
     public GeneradorReferencias (int tamPaginat, String nomImagent){
         this.tamPagina = tamPaginat;
@@ -33,7 +34,7 @@ public class GeneradorReferencias {
         imagenOut.escribirImagen(pathImagenSalida.toString());
 
 
-        String pathSalida = System.getProperty("user.dir") + "/src/referencias_" + nomImagen;
+        String pathSalida = System.getProperty("user.dir") + "/src/referencias_" + (nomImagen.replaceAll("\\.bmp$", "")) + ".txt";
         
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(pathSalida, true))) {
             writer.write("TP="+ Integer.toString(this.tamPagina) + "\n");
@@ -63,7 +64,35 @@ public class GeneradorReferencias {
             int desplazamientoPagFiltroY = ((NF*NC*3)+(3*3*4)) - (pagFiltroY*this.tamPagina);
 
             int pagRespuesta = (int) Math.floor(((NF*NC*3)+(3*3*4*2))/(double)this.tamPagina);
-            int desplazamientoRespuesta = ((NF*NC*3)+(3*3*4*2)+(NC*3+1)) - (pagRespuesta*this.tamPagina);
+            int desplazamientoRespuesta = ((NF*NC*3)+(3*3*4*2)) - (pagRespuesta*this.tamPagina);
+            System.out.println(desplazamientoPagFiltroY);
+            
+            
+            //Generar mensjaes del de rta, ya que es un caso diferente 
+
+            for (int i = 0; i < NF; i++) {
+                for (int j = 0; j < NC; j++) {
+                    //Imprimir el del Resultado
+                    for(int g = 0; g<3 ; g++){
+                        if (desplazamientoRespuesta >= this.tamPagina){
+                            pagRespuesta+=1;
+                            desplazamientoRespuesta = 0;
+                        }
+                        String canal = "r";
+                        if (g==1){
+                            canal = "g";
+                        }
+                        else if(g==2){
+                            canal = "b";
+                        }
+                        String respuestaLlave = String.format("Rta[%d][%d].%s", i,j,canal);
+                        String respuesta = String.format("Rta[%d][%d].%s, %d, %d, W", i, j,canal,pagRespuesta,desplazamientoRespuesta);
+
+                        pagImagenes.put(respuestaLlave, respuesta);
+                        desplazamientoRespuesta+=1;
+                    }
+                }
+            }
 
             // Matriz Imagen
             for (int i = 1; i < NF-1; i++) {
@@ -72,7 +101,7 @@ public class GeneradorReferencias {
                         for (int kj = -1; kj <= 1; kj++){
                             //Escribir cada canal
                             for (int g = 0; g < 3; g++){
-                                if (desplazamientoPag >= 512){
+                                if (desplazamientoPag >= this.tamPagina){
                                     pag+=1;
                                     desplazamientoPag = 0;
                                 }
@@ -99,27 +128,71 @@ public class GeneradorReferencias {
                                 
                             }
 
-                            //Escribir Para filtros
-                            if (desplazamientoPagFiltroX + 4 >= 512){
-                                pagFiltroX+=1;
-                                desplazamientoPagFiltroX = 0;
+                            //Escribir Para filtros Considerando el caso que desborde la pagina
+                            if (desplazamientoPagFiltroX + 4 >= this.tamPagina){
+                                int espacio_restante = this.tamPagina - desplazamientoPagFiltroX;
+                                if (espacio_restante > 0){
+                                    String sobelX = String.format("SOBEL_X[%d][%d], %d, %d, R", 1+ki, 1+kj,pagFiltroX,desplazamientoPagFiltroX);
+                                    writer.write(sobelX + "\n");
+                                    writer.write(sobelX + "\n");
+                                    writer.write(sobelX + "\n");
+                                    pagFiltroX+=1;
+                                    
+                                    sobelX = String.format("SOBEL_X[%d][%d], %d, %d, R", 1+ki, 1+kj,pagFiltroX,0);
+                                    writer.write(sobelX + "\n");
+                                    writer.write(sobelX + "\n");
+                                    writer.write(sobelX + "\n");
+                                    desplazamientoPagFiltroX = desplazamientoPagFiltroX + 4 - this.tamPagina;
+                                }else{
+                                    pagFiltroX+=1;
+                                    desplazamientoPagFiltroX = 0;
+                                    String sobelX = String.format("SOBEL_X[%d][%d], %d, %d, R", 1+ki, 1+kj,pagFiltroX,desplazamientoPagFiltroX);
+                                    writer.write(sobelX + "\n");
+                                    writer.write(sobelX + "\n");
+                                    writer.write(sobelX + "\n");
+                                    desplazamientoPagFiltroX+=4;
+                                }
+                            }else{
+                                String sobelX = String.format("SOBEL_X[%d][%d], %d, %d, R", 1+ki, 1+kj,pagFiltroX,desplazamientoPagFiltroX);
+                                writer.write(sobelX + "\n");
+                                writer.write(sobelX + "\n");
+                                writer.write(sobelX + "\n");
+                                desplazamientoPagFiltroX+=4;
                             }
 
-                            String sobelX = String.format("SOBEL_X[%d][%d], %d, %d, R", 1+ki, 1+kj,pagFiltroX,desplazamientoPagFiltroX);
-                            writer.write(sobelX + "\n");
-                            writer.write(sobelX + "\n");
-                            writer.write(sobelX + "\n");
-                            desplazamientoPagFiltroX+=4;
-
-                            if (desplazamientoPagFiltroY + 4 >= 512){
-                                pagFiltroY+=1;
-                                desplazamientoPagFiltroY = 0;
+                            
+                            //Para Y
+                            if (desplazamientoPagFiltroY + 4 >= this.tamPagina){
+                                int espacio_restante = this.tamPagina - desplazamientoPagFiltroY;
+                                if (espacio_restante > 0){
+                                    String sobelY = String.format("SOBEL_Y[%d][%d], %d, %d, R", 1+ki, 1+kj,pagFiltroY,desplazamientoPagFiltroY);
+                                    writer.write(sobelY + "\n");
+                                    writer.write(sobelY + "\n");
+                                    writer.write(sobelY + "\n");
+                                    desplazamientoPagFiltroY+=4;
+                                    pagFiltroY+=1;
+                                    
+                                    sobelY = String.format("SOBEL_Y[%d][%d], %d, %d, R", 1+ki, 1+kj,pagFiltroY,0);
+                                    writer.write(sobelY + "\n");
+                                    writer.write(sobelY + "\n");
+                                    writer.write(sobelY + "\n");
+                                    desplazamientoPagFiltroY+=4;
+                                    desplazamientoPagFiltroY = desplazamientoPagFiltroY + 4 - this.tamPagina;
+                                }else{
+                                    pagFiltroY+=1;
+                                    String sobelY = String.format("SOBEL_Y[%d][%d], %d, %d, R", 1+ki, 1+kj,pagFiltroY,0);
+                                    writer.write(sobelY + "\n");
+                                    writer.write(sobelY + "\n");
+                                    writer.write(sobelY + "\n");
+                                    desplazamientoPagFiltroY = 0;
+                                }
+                            }else{
+                                String sobelY = String.format("SOBEL_Y[%d][%d], %d, %d, R", 1+ki, 1+kj,pagFiltroY,desplazamientoPagFiltroY);
+                                writer.write(sobelY + "\n");
+                                writer.write(sobelY + "\n");
+                                writer.write(sobelY + "\n");
+                                desplazamientoPagFiltroY+=4;
                             }
-                            String sobelY = String.format("SOBEL_Y[%d][%d], %d, %d, R", 1+ki, 1+kj,pagFiltroY,desplazamientoPagFiltroY);
-                            writer.write(sobelY + "\n");
-                            writer.write(sobelY + "\n");
-                            writer.write(sobelY + "\n");
-                            desplazamientoPagFiltroY+=4;
 
                         }
                     }
@@ -132,10 +205,7 @@ public class GeneradorReferencias {
 
                     //Imprimir el del Resultado
                     for(int g = 0; g<3 ; g++){
-                        if (desplazamientoRespuesta >= 512){
-                            pagRespuesta+=1;
-                            desplazamientoRespuesta = 0;
-                        }
+
                         String canal = "r";
                         if (g==1){
                             canal = "g";
@@ -143,11 +213,11 @@ public class GeneradorReferencias {
                         else if(g==2){
                             canal = "b";
                         }
-                        String respuesta = String.format("Rta[%d][%d].%s, %d, %d, W", i, j,canal,pagRespuesta,desplazamientoRespuesta);
+
+                        String respuestaLlave = String.format("Rta[%d][%d].%s", i,j,canal);
+                        String respuesta = pagImagenes.get(respuestaLlave);
                         writer.write(respuesta + "\n");
-                        desplazamientoRespuesta+=1;
                     }
-                    
                 }
             }
 
