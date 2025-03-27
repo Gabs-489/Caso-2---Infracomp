@@ -63,7 +63,7 @@ public class GeneradorReferencias {
             int desplazamientoPagFiltroY = ((NF*NC*3)+(3*3*4)) - (pagFiltroY*this.tamPagina);
 
             int pagRespuesta = (int) Math.floor(((NF*NC*3)+(3*3*4*2))/(double)this.tamPagina);
-            int desplazamientoRespuesta = ((NF*NC*3)+(3*3*4*2)) - (pagRespuesta*this.tamPagina);
+            int desplazamientoRespuesta = ((NF*NC*3)+(3*3*4*2)+(NC*3+1)) - (pagRespuesta*this.tamPagina);
 
             // Matriz Imagen
             for (int i = 1; i < NF-1; i++) {
