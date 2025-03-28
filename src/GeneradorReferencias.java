@@ -169,22 +169,21 @@ public class GeneradorReferencias {
                                     writer.write(sobelY + "\n");
                                     writer.write(sobelY + "\n");
                                     writer.write(sobelY + "\n");
-                                    desplazamientoPagFiltroY+=4;
                                     pagFiltroY+=1;
                                     
                                     sobelY = String.format("SOBEL_Y[%d][%d], %d, %d, R", 1+ki, 1+kj,pagFiltroY,0);
                                     writer.write(sobelY + "\n");
                                     writer.write(sobelY + "\n");
-                                    writer.write(sobelY + "\n");
-                                    desplazamientoPagFiltroY+=4;
+                                    writer.write(sobelY + "\n");         
                                     desplazamientoPagFiltroY = desplazamientoPagFiltroY + 4 - this.tamPagina;
                                 }else{
                                     pagFiltroY+=1;
+                                    desplazamientoPagFiltroY = 0;
                                     String sobelY = String.format("SOBEL_Y[%d][%d], %d, %d, R", 1+ki, 1+kj,pagFiltroY,0);
                                     writer.write(sobelY + "\n");
                                     writer.write(sobelY + "\n");
                                     writer.write(sobelY + "\n");
-                                    desplazamientoPagFiltroY = 0;
+                                    desplazamientoPagFiltroY+=4;
                                 }
                             }else{
                                 String sobelY = String.format("SOBEL_Y[%d][%d], %d, %d, R", 1+ki, 1+kj,pagFiltroY,desplazamientoPagFiltroY);
