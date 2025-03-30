@@ -1,9 +1,10 @@
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Scanner;
+
+import Opcion1.GeneradorReferencias;
+import Opcion2.LeerArchivoReferencias;
+import Opcion2.PageTable;
+import Opcion2.ThreadReader;
+import Opcion2.ThreadUpdater;
 
 public class Main {
     public static void main(String[] args) throws Exception {
@@ -42,9 +43,14 @@ public class Main {
                     System.out.println("Ingrese el nombre del archivo de referencias:");
                     String archivoReferencias = scanner.next();
 
-                    String[] referencias = leerArchivoReferencias(archivoReferencias);
-                    PageTable pageTable = new PageTable(numMarcos);
 
+                    // Leer el archivo de referencias
+                    LeerArchivoReferencias leerArchivoReferencias = new LeerArchivoReferencias();
+                    leerArchivoReferencias.leerArchivoReferencias(archivoReferencias);
+                    String[] referencias = leerArchivoReferencias.getReferencias().toArray(new String[0]);
+
+                    // Ejecutar la simulación
+                    PageTable pageTable = new PageTable(numMarcos);
                     ThreadReader reader = new ThreadReader(pageTable, referencias);
                     ThreadUpdater updater = new ThreadUpdater(pageTable);
 
@@ -56,6 +62,10 @@ public class Main {
                     updater.join();
 
                     System.out.println("Simulación terminada.");
+                    System.out.println("El número de fallos de pagina obtenido fue: " + Integer.toString(pageTable.getMiss()));
+                    System.out.println("El número de hits de pagina obtenido fue: " + Integer.toString(pageTable.getHits()));
+                    System.out.println("El total de referencias fue: " + Integer.toString(pageTable.getHits()+pageTable.getMiss()));
+
                     break;
                 case 3:
                     System.out.println("Saliendo del programa...");
@@ -68,19 +78,5 @@ public class Main {
         scanner.close();
     }
 
-    private static String[] leerArchivoReferencias(String archivoReferencias) {
-        List<String> referencias = new ArrayList<>();
-        try (BufferedReader reader = new BufferedReader(new FileReader(archivoReferencias))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                // Filtra y agrega solo las líneas que contienen referencias válidas
-                if (line.startsWith("Imagen") || line.startsWith("SOBEL_X") || line.startsWith("SOBEL_Y")) {
-                    referencias.add(line);
-                }
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return referencias.toArray(new String[0]);
-    }
+    
 }
