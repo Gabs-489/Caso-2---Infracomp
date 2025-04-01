@@ -3,14 +3,16 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class PageTable {
-    private final Map<Integer, Pagina> tablaPaginas; // Tabla de páginas
+    private final Map<Integer, Integer> tablaPaginas; // Tabla de páginas
+    private final Map<Integer, Pagina> tablaMarcos; // Tabla de páginas
     private final int numMarcos;   // Número de marcos de página
     private boolean continuar = true;
     private int hits = 0;   // Número de marcos de página
     private int miss = 0;   // Número de marcos de página
 
-    public PageTable(int numFrames) {
-        this.tablaPaginas = new HashMap<>(numFrames);
+    public PageTable(int numFrames, int numPaginas) {
+        this.tablaPaginas = new HashMap<>(numPaginas);
+        this.tablaMarcos = new HashMap<>(numFrames);
         this.numMarcos = numFrames;
     }
     
@@ -19,7 +21,8 @@ public class PageTable {
     public synchronized boolean accessPage(int pageNumber) {
         if (this.tablaPaginas.containsKey(pageNumber)) {
             this.hits++; 
-            Pagina p = tablaPaginas.get(pageNumber);
+            int marco = tablaPaginas.get(pageNumber);
+            Pagina p = tablaMarcos.get(marco);
             p.setReferenciada(true);
             return true; // Hit, la página está en RAM
         }else{
@@ -36,13 +39,14 @@ public class PageTable {
         if (modifica){
             nuevaPagina.setModificada(modifica);
         }
-        tablaPaginas.put(pageNumber, nuevaPagina);
+        tablaPaginas.put(pageNumber, marco);
+        tablaMarcos.put(marco, nuevaPagina);
     }
 
     // Método sincronizado para reemplazar una página en RAM
     public synchronized void manejoFalloPagina(int pageNumber, boolean modifica) {
-        if (this.tablaPaginas.size() < numMarcos){ //Si hay espacio la agrega
-            int marco = tablaPaginas.size();
+        if (this.tablaMarcos.size() < numMarcos){ //Si hay espacio la agrega
+            int marco = tablaMarcos.size();
             agregarPagina(pageNumber,marco,modifica);
         }else{
             reemplazarPagLRU(pageNumber,modifica);
@@ -55,22 +59,23 @@ public class PageTable {
         int marco = -1;
         boolean[][] priorityOrder = {{false, false}, {false, true}, {true, false}, {true, true}};
         for (boolean[] priority : priorityOrder) {
-            for (Map.Entry<Integer, Pagina> entry : tablaPaginas.entrySet()) {
+            for (Map.Entry<Integer, Pagina> entry : tablaMarcos.entrySet()) {
                 Pagina pagina = entry.getValue();
                 if (pagina.referenciada == priority[0] && pagina.modificada == priority[1]) {
-                    pagEliminar = entry.getKey(); 
-                    marco = entry.getValue().marco;
+                    marco = entry.getKey(); 
+                    pagEliminar = entry.getValue().numeroPagina;
                     break;
                 }
             }
         }
+
         tablaPaginas.remove(pagEliminar);
         agregarPagina(pageNumber,marco,modifica);
     }
 
 
     public synchronized void actualizarEstado(){
-        for (Pagina pagina : tablaPaginas.values()) {
+        for (Pagina pagina : tablaMarcos.values()) {
             pagina.setReferenciada(false);
         }
     }

@@ -1,3 +1,4 @@
+import java.util.List;
 import java.util.Scanner;
 
 import Opcion1.GeneradorReferencias;
@@ -48,9 +49,11 @@ public class Main {
                     LeerArchivoReferencias leerArchivoReferencias = new LeerArchivoReferencias();
                     leerArchivoReferencias.leerArchivoReferencias(archivoReferencias);
                     String[] referencias = leerArchivoReferencias.getReferencias().toArray(new String[0]);
+                    List<String> config = leerArchivoReferencias.getConfiguracion();
+                    int numPaginas = Integer.parseInt(config.get(4).split("=")[1]);
 
                     // Ejecutar la simulación
-                    PageTable pageTable = new PageTable(numMarcos);
+                    PageTable pageTable = new PageTable(numMarcos, numPaginas);
                     ThreadReader reader = new ThreadReader(pageTable, referencias);
                     ThreadUpdater updater = new ThreadUpdater(pageTable);
 
