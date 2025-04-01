@@ -58,13 +58,14 @@ public class PageTable {
         int pagEliminar = -1;
         int marco = -1;
         boolean[][] priorityOrder = {{false, false}, {false, true}, {true, false}, {true, true}};
+        outerLoop:
         for (boolean[] priority : priorityOrder) {
             for (Map.Entry<Integer, Pagina> entry : tablaMarcos.entrySet()) {
                 Pagina pagina = entry.getValue();
                 if (pagina.referenciada == priority[0] && pagina.modificada == priority[1]) {
                     marco = entry.getKey(); 
                     pagEliminar = entry.getValue().numeroPagina;
-                    break;
+                    break outerLoop;
                 }
             }
         }
