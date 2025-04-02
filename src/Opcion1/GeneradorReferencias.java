@@ -47,7 +47,9 @@ public class GeneradorReferencias {
             writer.write("NC=" + Integer.toString(NC)+ "\n");
 
             //Falta el de referencias
-            Integer referenciasTotales = ((NF-2)*(NC-2)*3) + ((NF-2)*(NC-2)*9*9);
+
+            Integer referenciasSobel = ((NF-2)*(NC-2)*9*9) * (int) Math.ceil(4.0/this.tamPagina);
+            Integer referenciasTotales = ((NF-2)*(NC-2)*3) + referenciasSobel;
             writer.write("NR=" + Integer.toString(referenciasTotales)+ "\n");
 
             Integer totalPaginas =  (int) (Math.ceil((2*(NF*NC*3)+72)/ (double) this.tamPagina));
