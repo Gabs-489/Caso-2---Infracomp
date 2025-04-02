@@ -4,12 +4,14 @@ import java.util.Map;
 
 public class PageTable {
     private final Map<Integer, Integer> tablaPaginas; // Tabla de páginas
-    private final Map<Integer, Pagina> tablaMarcos; // Tabla de páginas
+    private final Map<Integer, Pagina> tablaMarcos; // Tabla de marcos
     private final int numMarcos;   // Número de marcos de página
     private boolean continuar = true;
     private int hits = 0;   // Número de marcos de página
     private int miss = 0;   // Número de marcos de página
-
+    private int tiempoRAM = 0; // Tiempo de acceso en ns
+    private int tiempoSWAP = 0; // Tiempo de acceso en ms
+    
     public PageTable(int numFrames, int numPaginas) {
         this.tablaPaginas = new HashMap<>(numPaginas);
         this.tablaMarcos = new HashMap<>(numFrames);
@@ -24,6 +26,7 @@ public class PageTable {
             int marco = tablaPaginas.get(pageNumber);
             Pagina p = tablaMarcos.get(marco);
             p.setReferenciada(true);
+            tiempoRAM += 50;
             return true; // Hit, la página está en RAM
         }else{
             this.miss++; 
@@ -51,6 +54,7 @@ public class PageTable {
         }else{
             reemplazarPagLRU(pageNumber,modifica);
         }
+        tiempoSWAP+=10;
     }
 
     //Encuentra la pagina con la que se va a remplazar usando el NRU
@@ -101,5 +105,16 @@ public class PageTable {
         this.continuar = continuar;
     }
 
+
+    public int getTiempoRAM() {
+        return tiempoRAM;
+    }
+
+
+    public int getTiempoSWAP() {
+        return tiempoSWAP;
+    }
+
+    
     
 }
