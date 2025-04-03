@@ -64,10 +64,15 @@ public class Main {
                     reader.join();
                     updater.join();
 
+                    System.out.println("----------------------------------------------------------------------------------------");
                     System.out.println("Simulación terminada.");
                     System.out.println("El número de fallos de pagina obtenido fue: " + Integer.toString(pageTable.getMiss()));
                     System.out.println("El número de hits de pagina obtenido fue: " + Integer.toString(pageTable.getHits()));
                     System.out.println("El total de referencias fue: " + Integer.toString(pageTable.getHits()+pageTable.getMiss()));
+                    System.out.println("El total de tiempo de lectura en RAM fue: " + Integer.toString(pageTable.getTiempoRAM()) + " ns.");
+                    System.out.println("El total de tiempo de lectura para datos en SWAP fue: " + Integer.toString(pageTable.getTiempoSWAP()) + " ms." );
+                    System.out.println("El total de tiempo fue: " + Double.toString(pageTable.getTiempoSWAP()+ (pageTable.getTiempoRAM()/1000000.0))+ " ms.");
+
 
                     break;
                 case 3:
