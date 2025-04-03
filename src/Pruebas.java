@@ -33,7 +33,8 @@ public class Pruebas {
                         lector.leerArchivoReferencias(archivoReferencias.substring(archivoReferencias.lastIndexOf("/") + 1));
 
                         String[] referencias = lector.getReferencias().toArray(new String[0]);
-                        PageTable pageTable = new PageTable(marcos);
+                        int numPaginas = Integer.parseInt(lector.getConfiguracion().get(4).split("=")[1]);
+                        PageTable pageTable = new PageTable(marcos, numPaginas);
                         ThreadReader reader = new ThreadReader(pageTable, referencias);
                         ThreadUpdater updater = new ThreadUpdater(pageTable);
 
